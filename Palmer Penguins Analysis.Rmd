@@ -1,0 +1,130 @@
+---
+title: "Analysis of the Palmer Penguins Dataset"
+author: "Moaz Mohammed El-Esawey"
+date: "10/25/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Loading the dataset and packages used
+we load the *palmerpenguins* package as it contains the data for out analysis. and tidyverse which contains some packages like *dplyr*, *ggplot* and more that is useful for analysis
+```{r echo=TRUE, warning=FALSE, message=FALSE}
+library('palmerpenguins')
+library('tidyverse')
+```
+
+
+```{r echo=TRUE}
+## clean the data and remove all the NA values.
+penguins <- penguins %>% 
+  drop_na()
+
+dim(penguins)
+head(penguins)
+
+```
+
+```{r}
+unique(penguins$species)
+unique(penguins$island)
+```
+
+as we saw here the data contains a 344 records of penguins of different species **Adelie**, **Gentoo** and **Chinstrap** in 3 different islands *Torgersen*, *Biscoe* and *Dream*
+
+the data have recorded is **bill_length_mm**, **bill_depth_mm**, **flipper_length_mm** and **body_mass_g** for each penguin.
+
+## Summary statictics for the dataset
+```{r}
+penguins %>% 
+  group_by(species) %>% 
+  drop_na() %>% 
+  summarise(mean_fl=mean(flipper_length_mm), mean_bm=mean(body_mass_g)) %>% 
+  arrange(mean_fl)
+```
+
+as we show above the **Gentoo** specie is the biggest flipper_length_mm and body_mass_g we means that it's the largest penguin in all species.
+
+## Visualizations
+```{r}
+ggplot(data=penguins, aes(x=flipper_length_mm, y=body_mass_g))+
+  geom_point(aes(color=species))
+```
+
+As we see that the **Gentoo** specie is the biggest and also found to be alone and with its own cluster of points away from the other two species.
+
+```{r}
+ggplot(data=penguins, aes(x=flipper_length_mm, y=body_mass_g))+
+  geom_point(aes(color=species, shape=island))
+```
+
+Also I found that the **Gentoo** specie found to live alone from the other in the **Biscoe** island.
+```{r}
+ggplot(data=penguins, aes(x=bill_length_mm, y=body_mass_g))+
+  geom_point(aes(color=species))+
+  geom_smooth(aes(color=species))
+```
+
+```{r}
+ggplot(data=penguins, aes(x=bill_length_mm, y=bill_depth_mm))+
+  geom_point(aes(color=species))+
+  geom_smooth(aes(color=species))
+```
+```{r}
+penguins_copy <- data.frame(penguins)
+
+penguins_copy <- penguins_copy  %>% 
+  mutate(bill_depth_mm=replace(bill_depth_mm, bill_length_mm==58.0, 22))
+# 
+# penguins_copy %>% 
+#   filter(species=='Chinstrap') %>% 
+#   arrange(-bill_length_mm)
+
+ggplot(data=penguins_copy, aes(x=bill_length_mm, y=bill_depth_mm))+
+  geom_point(aes(color=species))+
+  geom_smooth(aes(color=species))
+
+```
+
+
+```{r}
+penguins %>% 
+  filter(species=='Chinstrap') %>% 
+  arrange(-bill_length_mm)
+```
+
+in the above output the **Chinstrap** specie with the **bill_length_mm=58.0** seems to be an outlier for it or just might be classified wrongly as it should be a **Gentoo** specie.
+which can be shown in the smooth_line drawn in the above figure.
+or it might be a conversion as the bill_length_mm increased the penguin started to converts from **Chinstrap** to **Gentoo** .
+
+```{r}
+ggplot(data=penguins) +
+  geom_histogram(mapping=aes(x=flipper_length_mm, fill=species), bins = 30)
+```
+
+```{r}
+ggplot(data=penguins) +
+  geom_histogram(mapping=aes(y=flipper_length_mm, fill=species), bins = 30)+
+  facet_wrap(~species)
+```
+
+```{r}
+ggplot(penguins)+
+  geom_bar(aes(sex, fill=sex))
+```
+
+```{r}
+ggplot(penguins)+
+  geom_bar(aes(island, fill=island))
+```
+
+```{r}
+ggplot(penguins)+
+  geom_point(aes(x=flipper_length_mm, y=body_mass_g,
+                 color=species, shape=sex), alpha=.7)+
+  facet_grid(island~species)+
+  labs(title="Palmer Penguins: Flipper Length vs. Body Mass",
+       subtitle='Data grouped with island and species')
+```
+
+As shown in the above plot. We found that **Adelie** specie found in all the three island that why it has more records. in the dataset and the **Chinstrap** specie only shown in the **Dream** island and the **Gentoo** specie shown only in the **Biscoe** island.
